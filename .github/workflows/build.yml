@@ -1,0 +1,74 @@
+# Build and test on Windows, which is the only platform the app currently
+# supports. Several packages touch Windows APIs directly (the Credential
+# Manager, DPAPI, the Interactive Service pipe), so there is nothing useful to
+# gain from a Linux runner.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      # internal/creds writes to the runner's own Credential Manager and
+      # removes what it wrote; internal/vpn drives a fake management server over
+      # loopback. Neither needs OpenVPN installed, so the suite runs unattended.
+      - name: Test
+        run: go test ./internal/...
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.10
+
+      - name: Build
+        run: wails3 build
+
+      - name: Package
+        run: go run ./cmd/release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vpn-desktop-windows-amd64
+          path: dist/*.zip
+          if-no-files-found: error
+
+      # A tagged push publishes a draft release with the archive attached, so
+      # the notes can be reviewed before anyone can download it.
+      - name: Draft a release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: dist/*.zip
+          body_path: CHANGELOG.md

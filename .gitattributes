@@ -1,0 +1,15 @@
+# Normalise to LF in the repository. Checkouts still get native endings, so
+# Windows tooling is unaffected, but a contributor on another platform does not
+# see the whole tree as modified.
+* text=auto eol=lf
+
+# Anything the shell runs must keep LF even on a Windows checkout.
+*.sh text eol=lf
+
+*.png binary
+*.ico binary
+*.exe binary
+*.syso binary
+*.ttf binary
+*.woff binary
+*.woff2 binary

@@ -1,0 +1,19 @@
+{
+	"fixed": {
+		"file_version": "1.0.0.0",
+		"product_version": "1.0.0.0"
+	},
+	"info": {
+		"0409": {
+			"ProductVersion": "1.0.0",
+			"FileVersion": "1.0.0",
+			"CompanyName": "Muhib Ahmed",
+			"FileDescription": "A modern desktop client for OpenVPN",
+			"InternalName": "openvpn-desktop",
+			"LegalCopyright": "Copyright (c) 2026 Muhib Ahmed",
+			"OriginalFilename": "openvpn-desktop.exe",
+			"ProductName": "VPN Desktop",
+			"Comments": "https://github.com/MuhibAhmed/openvpn-desktop"
+		}
+	}
+}
