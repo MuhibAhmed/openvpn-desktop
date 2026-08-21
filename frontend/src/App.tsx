@@ -125,9 +125,16 @@ export default function App() {
       setSettings(prefs);
       setHealth(info);
       setLogs(existingLogs.slice(-LOG_CAP));
+
+      // A remembered id that no longer exists must not win over the fallback:
+      // a profile that has been renamed or deleted would otherwise leave the
+      // sidebar showing profiles with none of them selected, which reads as
+      // "my profile is gone".
+      const known = (id: string | null | undefined) =>
+        id && list.some((profile) => profile.id === id) ? id : null;
       setSelectedId(
-        current.profileId ||
-          prefs.lastProfileId ||
+        known(current.profileId) ??
+          known(prefs.lastProfileId) ??
           (list.length > 0 ? list[0].id : null),
       );
     })();
